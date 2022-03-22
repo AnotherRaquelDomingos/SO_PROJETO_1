@@ -34,16 +34,18 @@ void main_args(int argc, char* argv[], struct main_data *data) {
     data->n_restaurants = atoi(argv[3]); 
     data->n_drivers = atoi(argv[4]);
     data->n_clients = atoi(argv[5]);
+    struct operation ops[data->max_ops];
+    data->results = ops;
 }
 
 void user_interaction(struct communication_buffers* buffers, struct main_data* data) {
     int option;
+    do {
     printf("Insira o numero associado a escolha que pretende:\n");
     printf("1) Request <cliente> <restaurante> <dish>\n");
     printf("2) Status <id>\n");
     printf("3) Stop\n");
     printf("4) Help\n");
-    do {
         scanf("%d", &option);
         switch(option) {
             case 4: 
@@ -54,4 +56,34 @@ void user_interaction(struct communication_buffers* buffers, struct main_data* d
                     break;                          
         }
     } while (option != 3);
+}
+
+void read_status(struct main_data* data) {
+    int id, i;
+    printf("Insira o id do pedido do qual quer obter o status: ");
+    scanf("%d", &id);
+    if (id >= 1 && id <= data->max_ops) { // Quando pede id = 1, vamos a posicao 0, etc...
+        id--;
+        printf("Id do cliente que fez o pedido: %d\n", data->results[id].requesting_client);
+        printf("Id do restaurante requesitado: %d\n", data->results[id].requested_rest);
+        printf("Nome do prato pedido: %s\n", data->results[id].requested_dish);
+        printf("Id do restaurante que recebeu e processou o pedido: %d\n", data->results->receiving_rest);
+        printf("Id do motorista que recebeu e processou o pedido: %d\n", data->results[id].receiving_driver);
+        printf("Id do cliente que recebeu o pedido: %d\n", data->results[id].receiving_client);
+    }
+    else {
+        printf("Id invalido\n");
+    } 
+}
+
+void wait_processes(struct main_data* data) {
+    for (int *restPointer = data->restaurant_pids; restPointer < data->restaurant_pids + data->n_restaurants; restPointer++) {
+        waitpid(*restPointer,NULL,0);
+    }
+    for (int *drivPointer = data->driver_pids; drivPointer < data->driver_pids + data->n_drivers; drivPointer++) {
+        waitpid(*drivPointer,NULL,0);
+    }
+    for (int *cliPointer = data->client_pids; cliPointer < data->client_pids + data->n_clients; cliPointer++) {
+        waitpid(*cliPointer,NULL,0);
+    }
 }

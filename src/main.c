@@ -25,9 +25,6 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-
-
-
 void main_args(int argc, char* argv[], struct main_data *data) {
     data->max_ops = atoi(argv[1]);
     data->buffers_size = atoi(argv[2]);

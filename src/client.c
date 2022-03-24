@@ -6,5 +6,5 @@ void client_process_operation(struct operation* op, int client_id, struct main_d
     op->receiving_client = client_id;
     op->status = 'C';
     data->results[*counter] = *op;
-    *counter++;
+    (*counter)++;
 }

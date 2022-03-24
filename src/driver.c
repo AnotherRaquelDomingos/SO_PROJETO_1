@@ -6,5 +6,5 @@ void driver_process_operation(struct operation* op, int driver_id, struct main_d
     op->receiving_driver = driver_id;
     op->status = 'D';
     data->results[*counter] = *op;
-    *counter++;
+    (*counter)++;
 }

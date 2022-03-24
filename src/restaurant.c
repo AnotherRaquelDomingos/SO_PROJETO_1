@@ -6,7 +6,7 @@ void restaurant_process_operation(struct operation* op, int rest_id, struct main
     op->receiving_rest = rest_id;
     op->status = 'R';
     data->results[*counter] = *op;
-    *counter++;
+    (*counter)++;
 
     //TODO -> REVER O COUNTER E O ARRAY DE OPS (NO CLIENT.C E DRIVER.C TMB)
 }

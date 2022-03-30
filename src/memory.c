@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include "memory.h"
 
+
 int numDigits(int);
 int stringSize(char*);
 
@@ -36,7 +37,6 @@ void* create_shared_memory(char* name, int size) {
     shm_fd = shm_open(newName, O_CREAT | O_RDWR, 0666);
     ftruncate(shm_fd, size);
     ptr = mmap(0, size, PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    bzero(ptr, size);
     return ptr;
 }
 
@@ -46,16 +46,65 @@ void* create_dynamic_memory(int size) {
     return ptr;
 }
 
+void destroy_shared_memory(char* name, void* ptr, int size) {
+    int uid = getuid();
+    int arrSize = stringSize(name) + numDigits(uid);
+    char newName[arrSize];
+    sprintf(newName, "%s%d", name, uid);
+    int ret = munmap(ptr, size);
+    if (ret == -1) {
+        perror(newName);
+        exit(7);
+    }
+    ret = shm_unlink(newName);
+    if (ret == -1) {
+        perror(newName);
+        exit(8);
+    }
+}
+
 void destroy_dynamic_memory(void* ptr) {
     free(ptr);
+}
+
+//TODO verificar os se eh ponteiro ou conteudo do ponteiro
+void write_main_rest_buffer(struct rnd_access_buffer* buffer, int buffer_size, struct operation* op) {
+    for (int i = 0 ; i < buffer_size ; i++) {
+        if (buffer->ptrs[i] == 0) {
+            buffer->ptrs[i] = 1;
+            buffer->buffer[i] = *op;
+            break; 
+        }
+    }   
 }
 
 void write_rest_driver_buffer(struct circular_buffer* buffer, int buffer_size, struct operation* op) {
     int in = buffer->ptrs->in;
     if (((in + 1) % buffer_size) != buffer->ptrs->out) {
-        buffer->buffer[in] = op;
+        buffer->buffer[in] = *op;
         buffer->ptrs->in = (in + 1) % buffer_size;
     }
+}
+
+void write_driver_client_buffer(struct rnd_access_buffer* buffer, int buffer_size, struct operation* op) {
+      for (int i = 0 ; i < buffer_size ; i++) {
+        if (buffer->ptrs[i] == 0) {
+            buffer->ptrs[i] = 1;
+            buffer->buffer[i] = *op;
+            break; 
+        }
+    } 
+}
+
+void read_main_rest_buffer(struct rnd_access_buffer* buffer, int rest_id, int buffer_size, struct operation* op) {
+    for (int i = 0; i < buffer_size; i++) {
+      if (buffer->ptrs[i] == 1 && (buffer->buffer[i]).requested_rest == rest_id) {
+          *op = buffer->buffer[i];
+          buffer->ptrs[i] = 0;
+          return;
+      }  
+    }
+    op->id = -1;
 }
 
 void read_rest_driver_buffer(struct circular_buffer* buffer, int buffer_size, struct operation* op) {
@@ -69,6 +118,17 @@ void read_rest_driver_buffer(struct circular_buffer* buffer, int buffer_size, st
     }
 }
 
+void read_driver_client_buffer(struct rnd_access_buffer* buffer, int client_id, int buffer_size, struct operation* op) {
+    for (int i = 0; i < buffer_size; i++) {
+        if (buffer->ptrs[i] == 1 && (buffer->buffer[i]).requesting_client == client_id) {
+            *op = buffer->buffer[i];
+            buffer->ptrs[i] = 0;
+            return;
+        }
+    }
+    op->id = -1; // this line is read if the condtion above is never met
+}
+
 int numDigits(int n) {
     int count = 0;
     do {
@@ -77,7 +137,6 @@ int numDigits(int n) {
     } while (n != 0);
     return count;
 }
-
 
 int stringSize(char* str) {
     int i = 0;

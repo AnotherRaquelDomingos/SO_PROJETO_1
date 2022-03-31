@@ -95,8 +95,16 @@ void user_interaction(struct communication_buffers* buffers, struct main_data* d
     } while (option != 3);
 }
 
+void create_request(int* op_counter, struct communication_buffers* buffers, struct main_data* data) {
+    //Assumindo que op_counter comeca a 0
+    if (*op_counter < data->max_ops) {
+        
+    }
+    
+}
+
 void read_status(struct main_data* data) {
-    int id, i;
+    int id;
     printf("Insira o id do pedido do qual quer obter o status: ");
     scanf("%d", &id);
     if (id >= 1 && id <= data->max_ops) { // Quando pede id = 1, vamos a posicao 0, etc...
@@ -113,14 +121,25 @@ void read_status(struct main_data* data) {
     } 
 }
 
+
+
 void wait_processes(struct main_data* data) {
-    for (int *restPointer = data->restaurant_pids; restPointer < data->restaurant_pids + data->n_restaurants; restPointer++) {
-        waitpid(*restPointer,NULL,0);
+    for (int i = 0; i < data->n_restaurants; i++) {
+        wait_process(data->restaurant_pids[i]);
     }
-    for (int *drivPointer = data->driver_pids; drivPointer < data->driver_pids + data->n_drivers; drivPointer++) {
-        waitpid(*drivPointer,NULL,0);
+    for (int i = 0; i < data->n_drivers; i++) {
+        wait_process(data->driver_pids[i]);
     }
-    for (int *cliPointer = data->client_pids; cliPointer < data->client_pids + data->n_clients; cliPointer++) {
-        waitpid(*cliPointer,NULL,0);
+    for (int i = 0; i < data->n_clients; i++) {
+        wait_process(data->client_pids[i]);
     }
+    // for (int *restPointer = data->restaurant_pids; restPointer < data->restaurant_pids + data->n_restaurants; restPointer++) {
+    //     wait_process(*restPointer);
+    // }
+    // for (int *drivPointer = data->driver_pids; drivPointer < data->driver_pids + data->n_drivers; drivPointer++) {
+    //     wait_process(*drivPointer);
+    // }
+    // for (int *cliPointer = data->client_pids; cliPointer < data->client_pids + data->n_clients; cliPointer++) {
+    //     wait_process(*cliPointer);
+    // }
 }

@@ -4,6 +4,10 @@
 #include <sys/wait.h>
 #include "memory.h"
 #include "main.h"
+#include "client.h"
+#include "driver.h"
+#include "restaurant.h"
+#include "process.h"
 
 int launch_restaurant(int restaurant_id, struct communication_buffers* buffers, struct main_data* data) {
     pid_t pid = fork();

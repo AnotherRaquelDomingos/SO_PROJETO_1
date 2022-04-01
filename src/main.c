@@ -14,7 +14,9 @@ int main(int argc, char *argv[]) {
     
     //execute main code
     main_args(argc, argv, data);
-    printf("maxops:%d buffers:%d rests:%d driveers:%d clients:%d\n", data->max_ops, data->buffers_size, data->n_restaurants, data->n_drivers, data->n_clients);
+    create_dynamic_memory_buffers(data);
+    create_shared_memory_buffers(data, buffers);
+    launch_processes(buffers, data);
     user_interaction(buffers, data);
     
     //release memory before terminating
@@ -32,9 +34,12 @@ void main_args(int argc, char* argv[], struct main_data *data) {
     data->n_restaurants = atoi(argv[3]); 
     data->n_drivers = atoi(argv[4]);
     data->n_clients = atoi(argv[5]);
-    struct operation ops[data->max_ops];
-    data->results = ops;
-    create_dynamic_memory_buffers(data);
+    // struct operation ops[data->max_ops];
+    // data->results = ops;
+    int rest_stats = 0, driver_stats = 0, client_stats = 0;
+    data->restaurant_stats = &rest_stats;
+    data->driver_stats = &driver_stats;
+    data->client_stats = &client_stats;
 }
 
 void create_dynamic_memory_buffers(struct main_data* data) {
@@ -48,23 +53,24 @@ void create_dynamic_memory_buffers(struct main_data* data) {
 
 //TODO ver se eh mesmo shareed ou dynamic
 void create_shared_memory_buffers(struct main_data* data, struct communication_buffers* buffers) {
-    buffers->main_rest = create_shared_memory("/main_rest", sizeof(struct rnd_access_buffer));
-    buffers->main_rest->ptrs = create_shared_memory("/main_rest/ptrs", sizeof(int)*(data->max_ops));
-    buffers->main_rest->buffer = create_shared_memory("/main_rest/buffer", sizeof(struct operation)*(data->max_ops));
+    buffers->main_rest->ptrs = create_shared_memory("/main_rest_ptrs", sizeof(int)*(data->buffers_size));
+    buffers->main_rest->buffer = create_shared_memory("/main_rest_buffer", sizeof(struct operation)*(data->buffers_size));
     
-    buffers->rest_driv = create_shared_memory("/rest_driv", sizeof(struct circular_buffer));
-    buffers->rest_driv->ptrs = create_shared_memory("/rest_driv/ptrs", sizeof(struct pointers)*(data->max_ops));
-    buffers->rest_driv->buffer = create_shared_memory("/rest_driv/buffer", sizeof(struct operation)*(data->max_ops));
+    buffers->rest_driv->ptrs = create_shared_memory("/rest_driv_ptrs", sizeof(struct pointers)*(data->buffers_size));
+    buffers->rest_driv->buffer = create_shared_memory("/rest_driv_buffer", sizeof(struct operation)*(data->buffers_size));
 
-    buffers->driv_cli = create_shared_memory("/driv_cli", sizeof(struct rnd_access_buffer));
-    buffers->driv_cli->ptrs = create_shared_memory("/driv_cli/ptrs", sizeof(int)*(data->max_ops));
-    buffers->driv_cli->buffer = create_shared_memory("/driv_cli/buffer", sizeof(struct operation)*(data->max_ops));
-    // data->results = create_shared_memory("/results", sizeof(struct ))
+    buffers->driv_cli->ptrs = create_shared_memory("/driv_cli_ptrs", sizeof(int)*(data->buffers_size));
+    buffers->driv_cli->buffer = create_shared_memory("/driv_cli_buffer", sizeof(struct operation)*(data->buffers_size));
+    data->results = create_shared_memory("/results", sizeof(struct operation)*(data->max_ops));
+    data->terminate = create_shared_memory("/terminate", sizeof(int));
 }
 
 void launch_processes(struct communication_buffers* buffers, struct main_data* data) {
+    int x = data->n_restaurants;
+    printf("%d\n", x);
     for(int i = 0; i < data->n_restaurants; i++) {
        data->restaurant_pids[i] = launch_restaurant((i+1), buffers, data);
+       printf("cheguei\n");
     }
     for(int i = 0; i < data->n_drivers; i++) {
         data->driver_pids[i] = launch_driver((i+1), buffers, data);
@@ -75,7 +81,7 @@ void launch_processes(struct communication_buffers* buffers, struct main_data* d
 }
 
 void user_interaction(struct communication_buffers* buffers, struct main_data* data) {
-    int option;
+    int option, counter = 0; 
     //TODO terminar
     do {
         printf("Insira o numero associado a escolha que pretende:\n");
@@ -85,6 +91,13 @@ void user_interaction(struct communication_buffers* buffers, struct main_data* d
         printf("4) Help\n");
             scanf("%d", &option);
             switch(option) {
+                case 1:
+                    // scanf("%s", NULL);
+                    create_request(&counter, buffers, data);
+                    break;
+                case 2:
+                    read_status(data);
+                    break;
                 case 4: 
                     printf("1 (Request) - Cria um pedido de encomenda"
                         "do cliente <cliente> ao restaurante <restaurant>, pedindo o prato <dish>\n" 
@@ -98,9 +111,17 @@ void user_interaction(struct communication_buffers* buffers, struct main_data* d
 void create_request(int* op_counter, struct communication_buffers* buffers, struct main_data* data) {
     //Assumindo que op_counter comeca a 0
     if (*op_counter < data->max_ops) {
-        
+        struct operation *op = create_dynamic_memory(sizeof(struct operation));
+        op->id = *(op_counter);
+        int requested_rest, requesting_client;
+        char dish[20];
+        scanf("%d%d%s", &requesting_client, &requested_rest, dish);
+        op->requested_rest = requested_rest;
+        op->requesting_client = requesting_client;
+        op->requested_dish = dish;
+        write_main_rest_buffer(buffers->main_rest, data->buffers_size, op);       
+        printf("O pedido #%d foi criado\n", (*op_counter)++);
     }
-    
 }
 
 void read_status(struct main_data* data) {
@@ -115,6 +136,7 @@ void read_status(struct main_data* data) {
         printf("Id do restaurante que recebeu e processou o pedido: %d\n", data->results->receiving_rest);
         printf("Id do motorista que recebeu e processou o pedido: %d\n", data->results[id].receiving_driver);
         printf("Id do cliente que recebeu o pedido: %d\n", data->results[id].receiving_client);
+        printf("\n");
     }
     else {
         printf("Id invalido\n");

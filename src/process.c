@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include "memory.h"
 #include "main.h"
 #include "client.h"
@@ -16,10 +17,11 @@ int launch_restaurant(int restaurant_id, struct communication_buffers* buffers, 
         exit(1);
     }
     else if (pid == 0) {
-        exit(execute_restaurant(restaurant_id, buffers, data));
+        // printf("chegou o filho\n");
+        int ret = execute_restaurant(restaurant_id, buffers, data);
+        exit(ret);
     }
     else {
-        wait_process(pid);
         return pid;
     } 
 }
@@ -34,7 +36,6 @@ int launch_driver(int driver_id, struct communication_buffers* buffers, struct m
         exit(execute_driver(driver_id, buffers, data));
     }
     else {
-        wait_process(pid);
         return pid;
     } 
 }
@@ -49,7 +50,6 @@ int launch_client(int client_id, struct communication_buffers* buffers, struct m
         exit(execute_client(client_id, buffers, data));
     }
     else {
-        wait_process(pid);
         return pid;
     } 
 }
@@ -57,6 +57,8 @@ int launch_client(int client_id, struct communication_buffers* buffers, struct m
 int wait_process(int process_id) {
     int status;
     waitpid(process_id, &status, 0);
+    // printf("chegou\n");
+    // printf("%d\n", status);
     if (WIFEXITED(status)) {
         return WEXITSTATUS(status);
     }

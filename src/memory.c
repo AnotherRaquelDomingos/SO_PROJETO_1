@@ -100,7 +100,7 @@ void read_main_rest_buffer(struct rnd_access_buffer* buffer, int rest_id, int bu
     for (int i = 0; i < buffer_size; i++) {
         // int x = buffer->ptrs[i];
         // printf("chegooou\n"); 
-      if (buffer->ptrs[i] == 1 && (buffer->buffer[i]).requested_rest == rest_id) {
+      if (buffer->ptrs[i] == 1 && buffer->buffer[i].requested_rest == rest_id) {
           *op = buffer->buffer[i];
           buffer->ptrs[i] = 0;
           return;
@@ -122,7 +122,7 @@ void read_rest_driver_buffer(struct circular_buffer* buffer, int buffer_size, st
 
 void read_driver_client_buffer(struct rnd_access_buffer* buffer, int client_id, int buffer_size, struct operation* op) {
     for (int i = 0; i < buffer_size; i++) {
-        if (buffer->ptrs[i] == 1 && (buffer->buffer[i]).requesting_client == client_id) {
+        if (buffer->ptrs[i] == 1 && buffer->buffer[i].requesting_client == client_id) {
             *op = buffer->buffer[i];
             buffer->ptrs[i] = 0;
             return;

@@ -6,11 +6,12 @@
 int execute_client(int client_id, struct communication_buffers* buffers, struct main_data* data) {
     int processed_ops = 0;
     int *p_counter = &processed_ops;
+    struct operation *op = create_dynamic_memory(sizeof(struct operation));
     while(1) {
-        struct operation *op = create_dynamic_memory(sizeof(struct operation));
         client_get_operation(op, client_id, buffers, data);
         if (op->id != -1) {
             if (*(data->terminate) == 1) {
+                destroy_dynamic_memory(op);
                 return processed_ops;
             }
             client_process_operation(op, client_id, data, p_counter);

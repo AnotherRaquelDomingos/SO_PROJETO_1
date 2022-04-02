@@ -7,11 +7,12 @@
 int execute_driver(int driver_id, struct communication_buffers* buffers, struct main_data* data) {
     int processed_ops = 0;
     int *p_counter = &processed_ops;
+    struct operation *op = create_dynamic_memory(sizeof(struct operation));
     while(1) {
-        struct operation *op = create_dynamic_memory(sizeof(struct operation));
         driver_receive_operation(op, buffers, data);
         if (op->id != -1) {
             if (*(data->terminate) == 1) {
+                destroy_dynamic_memory(op);
                 return processed_ops;
             }
             driver_process_operation(op, driver_id, data, p_counter);

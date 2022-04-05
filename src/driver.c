@@ -29,11 +29,10 @@ void driver_receive_operation(struct operation* op, struct communication_buffers
 void driver_process_operation(struct operation* op, int driver_id, struct main_data* data, int* counter) {
     op->receiving_driver = driver_id;
     op->status = 'D';
-    data->results[*counter] = *op;
+    data->results[op->id] = *op;
     (*counter)++;
 }
 
 void driver_send_answer(struct operation* op, struct communication_buffers* buffers, struct main_data* data) {
-    // data->driver_stats[(op->receiving_driver)-1]++;
     write_driver_client_buffer(buffers->driv_cli, data->buffers_size, op);
 }

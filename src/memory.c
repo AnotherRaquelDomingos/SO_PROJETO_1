@@ -12,22 +12,6 @@
 int numDigits(int);
 int stringSize(char*);
 
-// int main() {
-//     char *str = "string";
-//     int uid = getuid();
-//     char *uidStr;
-//     int arrSize = stringSize(str) + numDigits(uid);
-//     char newStr[100];
-//     sprintf(newStr, "%s%d", str, uid);
-//     // snprintf(newStr, 100, "%s%d", str, uid);
-//     // strcat(str, uid);
-//     printf("%ld\n", sizeof(str));
-//     printf("%d\n", numDigits(uid));
-//     printf("%d\n", arrSize);
-//     printf("%s\n", newStr);
-//     return 0;
-// }
-
 void* create_shared_memory(char* name, int size) {
     int shm_fd, uid = getuid();
     void *ptr;
@@ -67,7 +51,6 @@ void destroy_dynamic_memory(void* ptr) {
     free(ptr);
 }
 
-//TODO verificar os se eh ponteiro ou conteudo do ponteiro
 void write_main_rest_buffer(struct rnd_access_buffer* buffer, int buffer_size, struct operation* op) {
     for (int i = 0 ; i < buffer_size ; i++) {
         if (buffer->ptrs[i] == 0) {
@@ -98,13 +81,11 @@ void write_driver_client_buffer(struct rnd_access_buffer* buffer, int buffer_siz
 
 void read_main_rest_buffer(struct rnd_access_buffer* buffer, int rest_id, int buffer_size, struct operation* op) {
     for (int i = 0; i < buffer_size; i++) {
-        // int x = buffer->ptrs[i];
-        // printf("chegooou\n"); 
-      if (buffer->ptrs[i] == 1 && buffer->buffer[i].requested_rest == rest_id) {
-          *op = buffer->buffer[i];
-          buffer->ptrs[i] = 0;
-          return;
-      }  
+        if (buffer->ptrs[i] == 1 && buffer->buffer[i].requested_rest == rest_id) {
+            *op = buffer->buffer[i];
+            buffer->ptrs[i] = 0;
+            return;
+        }  
     }
     op->id = -1;
 }
@@ -128,7 +109,7 @@ void read_driver_client_buffer(struct rnd_access_buffer* buffer, int client_id, 
             return;
         }
     }
-    op->id = -1; // this line is read if the condtion above is never met
+    op->id = -1;
 }
 
 int numDigits(int n) {

@@ -9,7 +9,6 @@ int execute_restaurant(int rest_id, struct communication_buffers* buffers, struc
     int *p_counter = &processed_ops;
     while(1) {
         if (*(data->terminate) == 1) {
-            printf("Flag ficou a 1\n");
             destroy_dynamic_memory(op);
             return processed_ops;
         }
@@ -29,11 +28,10 @@ void restaurant_receive_operation(struct operation* op, int rest_id, struct comm
 void restaurant_process_operation(struct operation* op, int rest_id, struct main_data* data, int* counter) {
     op->receiving_rest = rest_id;
     op->status = 'R';
-    data->results[*counter] = *op;
+    data->results[op->id] = *op;
     (*counter)++;
 }
 
 void restaurant_forward_operation(struct operation* op, struct communication_buffers* buffers, struct main_data* data) {
-    // data->restaurant_stats[(op->receiving_rest)-1]++;
     write_rest_driver_buffer(buffers->rest_driv, data->buffers_size, op);
 }

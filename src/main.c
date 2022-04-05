@@ -36,12 +36,6 @@ void main_args(int argc, char* argv[], struct main_data *data) {
     data->n_restaurants = atoi(argv[3]); 
     data->n_drivers = atoi(argv[4]);
     data->n_clients = atoi(argv[5]);
-    // struct operation ops[data->max_ops];
-    // data->results = ops;
-    // int rest_stats = 0, driver_stats = 0, client_stats = 0;
-    // data->restaurant_stats = &rest_stats;
-    // data->driver_stats = &driver_stats;
-    // data->client_stats = &client_stats;
 }
 
 void create_dynamic_memory_buffers(struct main_data* data) {
@@ -53,19 +47,18 @@ void create_dynamic_memory_buffers(struct main_data* data) {
     data->client_stats = create_dynamic_memory(sizeof(int)*(data->n_clients));
 }
 
-//TODO ver se eh mesmo shared ou dynamic
 void create_shared_memory_buffers(struct main_data* data, struct communication_buffers* buffers) {
-    buffers->main_rest->ptrs = create_shared_memory("/main_rest_ptrs", sizeof(int)*(data->buffers_size));
-    buffers->main_rest->buffer = create_shared_memory("/main_rest_buffer", sizeof(struct operation)*(data->buffers_size));
+    buffers->main_rest->ptrs = create_shared_memory(STR_SHM_MAIN_REST_PTR, sizeof(int)*(data->buffers_size));
+    buffers->main_rest->buffer = create_shared_memory(STR_SHM_MAIN_REST_BUFFER, sizeof(struct operation)*(data->buffers_size));
     
-    buffers->rest_driv->ptrs = create_shared_memory("/rest_driv_ptrs", sizeof(struct pointers)*(data->buffers_size));
-    buffers->rest_driv->buffer = create_shared_memory("/rest_driv_buffer", sizeof(struct operation)*(data->buffers_size));
+    buffers->rest_driv->ptrs = create_shared_memory(STR_SHM_REST_DRIVER_PTR , sizeof(struct pointers)*(data->buffers_size));
+    buffers->rest_driv->buffer = create_shared_memory(STR_SHM_REST_DRIVER_BUFFER, sizeof(struct operation)*(data->buffers_size));
 
-    buffers->driv_cli->ptrs = create_shared_memory("/driv_cli_ptrs", sizeof(int)*(data->buffers_size));
-    buffers->driv_cli->buffer = create_shared_memory("/driv_cli_buffer", sizeof(struct operation)*(data->buffers_size));
+    buffers->driv_cli->ptrs = create_shared_memory(STR_SHM_DRIVER_CLIENT_PTR , sizeof(int)*(data->buffers_size));
+    buffers->driv_cli->buffer = create_shared_memory(STR_SHM_DRIVER_CLIENT_BUFFER, sizeof(struct operation)*(data->buffers_size));
     
-    data->results = create_shared_memory("/results", sizeof(struct operation)*(data->max_ops));
-    data->terminate = create_shared_memory("/terminate", sizeof(int));
+    data->results = create_shared_memory(STR_SHM_RESULTS, sizeof(struct operation)*(data->max_ops));
+    data->terminate = create_shared_memory(STR_SHM_TERMINATE, sizeof(int));
 }
 
 void launch_processes(struct communication_buffers* buffers, struct main_data* data) {
@@ -84,30 +77,30 @@ void user_interaction(struct communication_buffers* buffers, struct main_data* d
     char option[7];
     int  counter = 0; 
     //TODO terminar
+    printf("Insira o numero associado a escolha que pretende:\n");
+    printf("\trequest <cliente> <restaurante> <dish>\n");
+    printf("\tstatus <id>\n");
+    printf("\tstop\n");
+    printf("\thelp\n");
     do {
-        printf("Insira o numero associado a escolha que pretende:\n");
-        printf("\trequest <cliente> <restaurante> <dish>\n");
-        printf("\tstatus <id>\n");
-        printf("\tstop\n");
-        printf("\thelp\n");
-            scanf("%s", option);
-            if(strcmp(option,"request") == 0){
-                    // scanf("%s", NULL);
-                    create_request(&counter, buffers, data);
-                    counter++;
-            }
-            else if(strcmp(option,"status") == 0){
-                    read_status(data);
-            }
-            else if(strcmp(option,"stop")== 0){
-                    stop_execution(data, buffers);
-            }
-            else if(strcmp(option,"help")== 0){
-                    printf("request - Cria um pedido de encomenda"
-                        "do cliente <cliente> ao restaurante <restaurant>, pedindo o prato <dish>\n" 
-                        "status - Consulta o estado do pedido especificado em <id>\n"
-                        "stop - Termina a execucao do Sistema\n");
-            }
+        printf("\nInsira acao :\n");
+        scanf("%s", option);
+        if(strcmp(option,"request") == 0){
+                create_request(&counter, buffers, data);
+                counter++;
+        }
+        else if(strcmp(option,"status") == 0){
+                read_status(data);
+        }
+        else if(strcmp(option,"stop")== 0){
+                stop_execution(data, buffers);
+        }
+        else if(strcmp(option,"help")== 0){
+                printf("request - Cria um pedido de encomenda"
+                    "do cliente <cliente> ao restaurante <restaurant>, pedindo o prato <dish>\n" 
+                    "status - Consulta o estado do pedido especificado em <id>\n"
+                    "stop - Termina a execucao do Sistema\n");
+        }
     } while (strcmp(option,"stop")!= 0);
 }
                  
@@ -133,7 +126,7 @@ void read_status(struct main_data* data) {
     int id;
     printf("Insira o id do pedido do qual quer obter o status:\n");
     scanf("%d", &id);
-    if (id >= 0 && id < data->max_ops) { 
+    if (id >= 0 && id < max_ops) { 
         printf("Id do cliente que fez o pedido: %d\n", data->results[id].requesting_client);
         printf("Id do restaurante requesitado: %d\n", data->results[id].requested_rest);
         printf("Nome do prato pedido: %s\n", data->results[id].requested_dish);
@@ -187,15 +180,15 @@ void destroy_memory_buffers(struct main_data* data, struct communication_buffers
     destroy_dynamic_memory(data->restaurant_stats);
     destroy_dynamic_memory(data->driver_stats);
     destroy_dynamic_memory(data->client_stats);
-    destroy_shared_memory("/results", data->results, sizeof(struct operation)*(data->max_ops));
-    destroy_shared_memory("/terminate", data->terminate, sizeof(int));
+    destroy_shared_memory(STR_SHM_RESULTS, data->results, sizeof(struct operation)*(data->max_ops));
+    destroy_shared_memory(STR_SHM_TERMINATE, data->terminate, sizeof(int));
 
-    destroy_shared_memory("/main_rest_ptrs", buffers->main_rest->ptrs, sizeof(int)*(data->buffers_size));
-    destroy_shared_memory("/main_rest_buffer", buffers->main_rest->buffer, sizeof(struct operation)*(data->buffers_size));
+    destroy_shared_memory(STR_SHM_MAIN_REST_PTR, buffers->main_rest->ptrs, sizeof(int)*(data->buffers_size));
+    destroy_shared_memory(STR_SHM_MAIN_REST_BUFFER, buffers->main_rest->buffer, sizeof(struct operation)*(data->buffers_size));
 
-    destroy_shared_memory("/rest_driv_ptrs", buffers->rest_driv->ptrs, sizeof(struct pointers)*(data->buffers_size));
-    destroy_shared_memory("/rest_driv_buffer", buffers->rest_driv->buffer, sizeof(struct operation)*(data->buffers_size));
+    destroy_shared_memory(STR_SHM_REST_DRIVER_PTR, buffers->rest_driv->ptrs, sizeof(struct pointers)*(data->buffers_size));
+    destroy_shared_memory(STR_SHM_REST_DRIVER_BUFFER, buffers->rest_driv->buffer, sizeof(struct operation)*(data->buffers_size));
 
-    destroy_shared_memory("/driv_cli_ptrs", buffers->driv_cli->ptrs, sizeof(int)*(data->buffers_size));
-    destroy_shared_memory("/driv_cli_buffer", buffers->driv_cli->buffer, sizeof(struct operation)*(data->buffers_size));
+    destroy_shared_memory(STR_SHM_DRIVER_CLIENT_PTR, buffers->driv_cli->ptrs, sizeof(int)*(data->buffers_size));
+    destroy_shared_memory(STR_SHM_DRIVER_CLIENT_BUFFER, buffers->driv_cli->buffer, sizeof(struct operation)*(data->buffers_size));
 }

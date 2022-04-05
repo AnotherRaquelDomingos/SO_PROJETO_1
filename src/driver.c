@@ -9,12 +9,13 @@ int execute_driver(int driver_id, struct communication_buffers* buffers, struct 
     int *p_counter = &processed_ops;
     struct operation *op = create_dynamic_memory(sizeof(struct operation));
     while(1) {
+        if (*(data->terminate) == 1) {
+            destroy_dynamic_memory(op);
+            return processed_ops;
+        }
         driver_receive_operation(op, buffers, data);
         if (op->id != -1) {
-            if (*(data->terminate) == 1) {
-                destroy_dynamic_memory(op);
-                return processed_ops;
-            }
+            printf("Motorista recebeu pedido!");
             driver_process_operation(op, driver_id, data, p_counter);
             driver_send_answer(op, buffers, data);
         }
@@ -34,6 +35,6 @@ void driver_process_operation(struct operation* op, int driver_id, struct main_d
 }
 
 void driver_send_answer(struct operation* op, struct communication_buffers* buffers, struct main_data* data) {
-    *(data->driver_stats)++;
+    data->driver_stats[op->receiving_driver]++;
     write_driver_client_buffer(buffers->driv_cli, data->buffers_size, op);
 }

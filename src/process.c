@@ -18,7 +18,9 @@ int launch_restaurant(int restaurant_id, struct communication_buffers* buffers, 
     }
     else if (pid == 0) {
         // printf("chegou o filho\n");
+        data->restaurant_pids[restaurant_id-1] = getpid();
         int ret = execute_restaurant(restaurant_id, buffers, data);
+        printf("restaurante acabou de executar\n");
         exit(ret);
     }
     else {
@@ -33,6 +35,7 @@ int launch_driver(int driver_id, struct communication_buffers* buffers, struct m
         exit(1);
     }
     else if (pid == 0) {
+        data->driver_pids[driver_id-1] = getpid();
         exit(execute_driver(driver_id, buffers, data));
     }
     else {
@@ -47,6 +50,7 @@ int launch_client(int client_id, struct communication_buffers* buffers, struct m
         exit(1);
     }
     else if (pid == 0) {
+        data->client_pids[client_id-1] = getpid();
         exit(execute_client(client_id, buffers, data));
     }
     else {

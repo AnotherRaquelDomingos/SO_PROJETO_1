@@ -3,7 +3,6 @@
 #include "main.h"
 #include "driver.h"
 
-
 int execute_driver(int driver_id, struct communication_buffers* buffers, struct main_data* data) {
     int processed_ops = 0;
     int *p_counter = &processed_ops;
@@ -35,6 +34,6 @@ void driver_process_operation(struct operation* op, int driver_id, struct main_d
 }
 
 void driver_send_answer(struct operation* op, struct communication_buffers* buffers, struct main_data* data) {
-    data->driver_stats[op->receiving_driver]++;
+    // data->driver_stats[(op->receiving_driver)-1]++;
     write_driver_client_buffer(buffers->driv_cli, data->buffers_size, op);
 }

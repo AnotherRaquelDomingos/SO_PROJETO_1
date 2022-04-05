@@ -3,11 +3,10 @@
 #include "main.h"
 #include "restaurant.h"
 
-
 int execute_restaurant(int rest_id, struct communication_buffers* buffers, struct main_data* data) {
+    struct operation *op = create_dynamic_memory(sizeof(struct operation));
     int processed_ops = 0;
     int *p_counter = &processed_ops;
-    struct operation *op = create_dynamic_memory(sizeof(struct operation));
     while(1) {
         if (*(data->terminate) == 1) {
             printf("Flag ficou a 1\n");
@@ -16,7 +15,6 @@ int execute_restaurant(int rest_id, struct communication_buffers* buffers, struc
         }
         restaurant_receive_operation(op, rest_id, buffers, data);
         if (op->id != -1) {
-            printf("Restaurante recebeu pedido!");
             restaurant_process_operation(op, rest_id, data, p_counter);
             restaurant_forward_operation(op, buffers, data);
         }
@@ -33,10 +31,9 @@ void restaurant_process_operation(struct operation* op, int rest_id, struct main
     op->status = 'R';
     data->results[*counter] = *op;
     (*counter)++;
-    //TODO -> REVER O COUNTER E O ARRAY DE OPS (NO CLIENT.C E DRIVER.C TMB)
 }
 
 void restaurant_forward_operation(struct operation* op, struct communication_buffers* buffers, struct main_data* data) {
-    data->restaurant_stats[op->receiving_rest]++;
+    // data->restaurant_stats[(op->receiving_rest)-1]++;
     write_rest_driver_buffer(buffers->rest_driv, data->buffers_size, op);
 }

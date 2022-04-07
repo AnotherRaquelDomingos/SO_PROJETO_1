@@ -20,7 +20,7 @@ int execute_driver(int driver_id, struct communication_buffers* buffers, struct 
         }
         driver_receive_operation(op, buffers, data);
         if (op->id != -1) {
-            printf("Motorista recebeu pedido!");
+            printf("Motorista recebeu pedido!\n");
             driver_process_operation(op, driver_id, data, p_counter);
             driver_send_answer(op, buffers, data);
         }

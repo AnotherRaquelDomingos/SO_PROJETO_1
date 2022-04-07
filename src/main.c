@@ -81,51 +81,52 @@ void launch_processes(struct communication_buffers* buffers, struct main_data* d
 void user_interaction(struct communication_buffers* buffers, struct main_data* data) {
     char option[7];
     int  counter = 0; 
-    //TODO terminar
     printf("Insira o numero associado a escolha que pretende:\n");
     printf("\trequest <cliente> <restaurante> <dish>\n");
     printf("\tstatus <id>\n");
     printf("\tstop\n");
     printf("\thelp\n");
     do {
-        printf("\nInsira acao :\n");
+        printf("Insira acao:\n");
         scanf("%s", option);
-        if(strcmp(option,"request") == 0){
+        if(strcmp(option,"request") == 0) {
                 create_request(&counter, buffers, data);
                 counter++;
         }
-        else if(strcmp(option,"status") == 0){
+        else if(strcmp(option,"status") == 0) {
                 read_status(data);
         }
-        else if(strcmp(option,"stop")== 0){
+        else if(strcmp(option,"stop")== 0) {
                 stop_execution(data, buffers);
         }
-        else if(strcmp(option,"help")== 0){
+        else if(strcmp(option,"help")== 0) {
                 printf("request - Cria um pedido de encomenda"
                     "do cliente <cliente> ao restaurante <restaurant>, pedindo o prato <dish>\n" 
                     "status - Consulta o estado do pedido especificado em <id>\n"
                     "stop - Termina a execucao do Sistema\n");
         }
-    } while (strcmp(option,"stop")!= 0);
+    } while (strcmp(option,"stop") != 0);
 }
                  
 void create_request(int* op_counter, struct communication_buffers* buffers, struct main_data* data) {
-    //Assumindo que op_counter comeca a 0
+    struct operation *op = create_dynamic_memory(sizeof(struct operation));
+    int requested_rest, requesting_client;
+    char *dish = create_dynamic_memory(20);
+    scanf("%d%d%s", &requesting_client, &requested_rest, dish);
     if (*op_counter < data->max_ops) {
-        struct operation *op = create_dynamic_memory(sizeof(struct operation));
         op->id = *(op_counter);
         op->status = 'I';
-        int requested_rest, requesting_client;
-        char *dish = create_dynamic_memory(20);
-        scanf("%d%d%s", &requesting_client, &requested_rest, dish);
         op->requested_rest = requested_rest;
         op->requesting_client = requesting_client;
         op->requested_dish = dish;
         data->results[*op_counter] = *op;
         write_main_rest_buffer(buffers->main_rest, data->buffers_size, op);       
-        destroy_dynamic_memory(op); 
         printf("O pedido #%d foi criado\n", *op_counter);
     }
+    else {
+       printf("O numero maximo de pedidos foi alcancado\n"); 
+    }
+    destroy_dynamic_memory(op); 
 }
 
 void read_status(struct main_data* data) {
@@ -166,7 +167,7 @@ void wait_processes(struct main_data* data) {
 }
 
 void write_statistics(struct main_data* data) {
-    printf("Terminando o MagnaEats. Imprimindo estatisticas:\n");
+    printf("Terminando o MAGNAEATS. Imprimindo estatisticas:\n");
     for (int i = 0; i < data->n_restaurants; i++) {
         printf("O restaurante %d preparou %d pedidos.\n", i+1, data->restaurant_stats[i]);
     }

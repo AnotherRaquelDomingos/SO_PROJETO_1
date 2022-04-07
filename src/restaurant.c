@@ -20,6 +20,7 @@ int execute_restaurant(int rest_id, struct communication_buffers* buffers, struc
         }
         restaurant_receive_operation(op, rest_id, buffers, data);
         if (op->id != -1) {
+            printf("Restaurante recebeu pedido\n");
             restaurant_process_operation(op, rest_id, data, p_counter);
             restaurant_forward_operation(op, buffers, data);
         }

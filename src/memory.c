@@ -22,8 +22,20 @@ void* create_shared_memory(char* name, int size) {
     char newName[arrSize];
     sprintf(newName, "%s%d", name, uid);
     shm_fd = shm_open(newName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    ftruncate(shm_fd, size);
+    if (shm_fd == -1) {
+        perror("shm");
+        exit(1);
+    }
+    int ret = ftruncate(shm_fd, size);
+    if (ret == -1) {
+        perror("shm");
+        exit(2);
+    }
     ptr = mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+    if (ptr == MAP_FAILED) {
+        perror("shm-mmap");
+        exit(3);
+    }
     return ptr;
 }
 
@@ -40,12 +52,12 @@ void destroy_shared_memory(char* name, void* ptr, int size) {
     sprintf(newName, "%s%d", name, uid);
     int ret = munmap(ptr, size);
     if (ret == -1) {
-        perror(newName);
-        exit(7);
+        perror("/shm");
+        exit(4);
     }
     ret = shm_unlink(newName);
     if (ret == -1) {
-        perror(newName);
+        perror("/shm");
         exit(8);
     }
 }

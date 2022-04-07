@@ -20,7 +20,7 @@ int execute_client(int client_id, struct communication_buffers* buffers, struct 
         }
         client_get_operation(op, client_id, buffers, data);
         if (op->id != -1) {
-            printf("Cliente recebeu pedido!");
+            printf("Cliente recebeu pedido!\n");
             client_process_operation(op, client_id, data, p_counter);
         }
     }

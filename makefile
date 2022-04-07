@@ -16,5 +16,5 @@ magnaeats: $(OBJECTOS)
 %.o: src/%.c $($@)
 	$(CC) $(CFLAGS) -o $(OBJ_DIR)/$@ -c $<
 clean:
-	rm -f *.o magnaeats
-	rm -f magnaeats
+	rm -f $(OBJ_DIR)/*.o bin/magnaeats
+	rm -f bin/magnaeats

@@ -180,11 +180,9 @@ void write_statistics(struct main_data* data) {
 }
 
 void destroy_memory_buffers(struct main_data* data, struct communication_buffers* buffers) {
-
     for (int i = 0; data->results[i].requested_dish != NULL; i++) {
         destroy_dynamic_memory(data->results[i].requested_dish);
     }
-    
     destroy_dynamic_memory(data->restaurant_pids);
     destroy_dynamic_memory(data->driver_pids);
     destroy_dynamic_memory(data->client_pids);
@@ -194,13 +192,10 @@ void destroy_memory_buffers(struct main_data* data, struct communication_buffers
     
     destroy_shared_memory(STR_SHM_RESULTS, data->results, sizeof(struct operation)*(data->max_ops));
     destroy_shared_memory(STR_SHM_TERMINATE, data->terminate, sizeof(int));
-
     destroy_shared_memory(STR_SHM_MAIN_REST_PTR, buffers->main_rest->ptrs, sizeof(int)*(data->buffers_size));
     destroy_shared_memory(STR_SHM_MAIN_REST_BUFFER, buffers->main_rest->buffer, sizeof(struct operation)*(data->buffers_size));
-
     destroy_shared_memory(STR_SHM_REST_DRIVER_PTR, buffers->rest_driv->ptrs, sizeof(struct pointers)*(data->buffers_size));
     destroy_shared_memory(STR_SHM_REST_DRIVER_BUFFER, buffers->rest_driv->buffer, sizeof(struct operation)*(data->buffers_size));
-
     destroy_shared_memory(STR_SHM_DRIVER_CLIENT_PTR, buffers->driv_cli->ptrs, sizeof(int)*(data->buffers_size));
     destroy_shared_memory(STR_SHM_DRIVER_CLIENT_BUFFER, buffers->driv_cli->buffer, sizeof(struct operation)*(data->buffers_size));
 }

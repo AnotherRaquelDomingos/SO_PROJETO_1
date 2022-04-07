@@ -4,4 +4,5 @@ Afonso Santos - FC56368
 Alexandre Figueiredo - FC57099
 Raquel Domingos - FC56378
 
-falar dos indices dos rests etc comecarem a 1 e nao a 0
+Os id's dos restaurantes, motoristas e clientes comecam a 1.
+Os id's dos pedidos começam a 0.

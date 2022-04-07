@@ -1,3 +1,9 @@
+/*
+* Grupo nº: 25
+* Afonso Santos - FC56368
+* Alexandre Figueiredo - FC57099
+* Raquel Domingos - FC56378
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

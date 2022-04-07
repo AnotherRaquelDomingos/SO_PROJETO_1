@@ -1,3 +1,9 @@
+/*
+* Grupo nº: 25
+* Afonso Santos - FC56368
+* Alexandre Figueiredo - FC57099
+* Raquel Domingos - FC56378
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +27,6 @@ int main(int argc, char *argv[]) {
     user_interaction(buffers, data);
     
     //release memory before terminating
-
     destroy_dynamic_memory(data);
     destroy_dynamic_memory(buffers->main_rest);
     destroy_dynamic_memory(buffers->rest_driv);
@@ -116,17 +121,17 @@ void create_request(int* op_counter, struct communication_buffers* buffers, stru
         op->requested_rest = requested_rest;
         op->requesting_client = requesting_client;
         op->requested_dish = dish;
-        data->results[*op_counter] = *op; 
+        data->results[*op_counter] = *op;
         write_main_rest_buffer(buffers->main_rest, data->buffers_size, op);       
+        destroy_dynamic_memory(op); 
         printf("O pedido #%d foi criado\n", *op_counter);
     }
 }
 
 void read_status(struct main_data* data) {
     int id;
-    printf("Insira o id do pedido do qual quer obter o status:\n");
     scanf("%d", &id);
-    if (id >= 0 && id < max_ops) { 
+    if (id >= 0 && data->results[id].requested_dish != NULL) { 
         printf("Id do cliente que fez o pedido: %d\n", data->results[id].requesting_client);
         printf("Id do restaurante requesitado: %d\n", data->results[id].requested_rest);
         printf("Nome do prato pedido: %s\n", data->results[id].requested_dish);
@@ -174,12 +179,18 @@ void write_statistics(struct main_data* data) {
 }
 
 void destroy_memory_buffers(struct main_data* data, struct communication_buffers* buffers) {
+
+    for (int i = 0; data->results[i].requested_dish != NULL; i++) {
+        destroy_dynamic_memory(data->results[i].requested_dish);
+    }
+    
     destroy_dynamic_memory(data->restaurant_pids);
     destroy_dynamic_memory(data->driver_pids);
     destroy_dynamic_memory(data->client_pids);
     destroy_dynamic_memory(data->restaurant_stats);
     destroy_dynamic_memory(data->driver_stats);
     destroy_dynamic_memory(data->client_stats);
+    
     destroy_shared_memory(STR_SHM_RESULTS, data->results, sizeof(struct operation)*(data->max_ops));
     destroy_shared_memory(STR_SHM_TERMINATE, data->terminate, sizeof(int));
 

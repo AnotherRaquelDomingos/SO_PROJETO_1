@@ -1,3 +1,9 @@
+/*
+* Grupo nº: 25
+* Afonso Santos - FC56368
+* Alexandre Figueiredo - FC57099
+* Raquel Domingos - FC56378
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/shm.h>
@@ -7,10 +13,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "memory.h"
-
-
-int numDigits(int);
-int stringSize(char*);
+#include "memory-private.h"
 
 void* create_shared_memory(char* name, int size) {
     int shm_fd, uid = getuid();

@@ -134,7 +134,7 @@ void read_status(struct main_data* data) {
     scanf("%d", &id);
     if (id >= 0 && data->results[id].requested_dish != NULL) { 
         printf("Id do cliente que fez o pedido: %d\n", data->results[id].requesting_client);
-        printf("Id do restaurante requesitado: %d\n", data->results[id].requested_rest);
+        printf("Id do restaurante requisitado: %d\n", data->results[id].requested_rest);
         printf("Nome do prato pedido: %s\n", data->results[id].requested_dish);
         printf("Id do restaurante que recebeu e processou o pedido: %d\n", data->results[id].receiving_rest);
         printf("Id do motorista que recebeu e processou o pedido: %d\n", data->results[id].receiving_driver);

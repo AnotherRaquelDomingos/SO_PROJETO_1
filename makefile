@@ -1,3 +1,8 @@
+# Grupo nº: 25
+# Afonso Santos - FC56368
+# Alexandre Figueiredo - FC57099
+# Raquel Domingos - FC56378
+
 OBJ_DIR = obj
 INC_DIR = include
 LIBS = -lrt

@@ -80,7 +80,7 @@ void launch_processes(struct communication_buffers* buffers, struct main_data* d
 
 void user_interaction(struct communication_buffers* buffers, struct main_data* data) {
     char option[7];
-    int  counter = 0; 
+    int  counter = 0; // represents the index of the op, op->id
     printf("Insira o numero associado a escolha que pretende:\n");
     printf("\trequest <cliente> <restaurante> <dish>\n");
     printf("\tstatus <id>\n");
@@ -132,6 +132,7 @@ void create_request(int* op_counter, struct communication_buffers* buffers, stru
 void read_status(struct main_data* data) {
     int id;
     scanf("%d", &id);
+    // if the requested_dish is a NULL it means the op doesn't exist
     if (id >= 0 && data->results[id].requested_dish != NULL) { 
         printf("Id do cliente que fez o pedido: %d\n", data->results[id].requesting_client);
         printf("Id do restaurante requisitado: %d\n", data->results[id].requested_rest);

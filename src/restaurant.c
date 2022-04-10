@@ -11,7 +11,7 @@
 
 int execute_restaurant(int rest_id, struct communication_buffers* buffers, struct main_data* data) {
     struct operation *op = create_dynamic_memory(sizeof(struct operation));
-    int processed_ops = 0;
+    int processed_ops = 0; // processed ops by this process
     int *p_counter = &processed_ops;
     while(1) {
         if (*(data->terminate) == 1) {

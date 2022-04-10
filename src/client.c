@@ -11,7 +11,7 @@
 
 int execute_client(int client_id, struct communication_buffers* buffers, struct main_data* data) {
     int processed_ops = 0;
-    int *p_counter = &processed_ops;
+    int *p_counter = &processed_ops; // processed ops by this process
     struct operation *op = create_dynamic_memory(sizeof(struct operation));
     while(1) {
         if (*(data->terminate) == 1) {

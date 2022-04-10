@@ -18,8 +18,10 @@
 void* create_shared_memory(char* name, int size) {
     int shm_fd, uid = getuid();
     void *ptr;
+    // calculate the size of the new string, since we add the uid
     int arrSize = stringSize(name) + numDigits(uid);
     char newName[arrSize];
+    // newName is now the given name concatenated with the uid
     sprintf(newName, "%s%d", name, uid);
     shm_fd = shm_open(newName, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (shm_fd == -1) {
@@ -46,6 +48,8 @@ void* create_dynamic_memory(int size) {
 }
 
 void destroy_shared_memory(char* name, void* ptr, int size) {
+    // since we added the uid when in create_shared_memory, we now need to
+    // add it here to the given name so it destroys the respective shared memory
     int uid = getuid();
     int arrSize = stringSize(name) + numDigits(uid);
     char newName[arrSize];
